@@ -1,0 +1,26 @@
+{
+  "name": "เช็คหวย - ตรวจหวยรัฐบาล ยี่กี หวยหุ้น",
+  "short_name": "เช็คหวย",
+  "description": "ตรวจหวยรัฐบาล หวยยี่กี 88 รอบ หวยหุ้น เลขเด็ด สถิติหวย อัพเดตทุกวัน",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff8f0",
+  "theme_color": "#b91c1c",
+  "lang": "th",
+  "categories": ["utilities", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

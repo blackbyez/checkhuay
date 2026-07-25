@@ -1,0 +1,17 @@
+{
+  "name": "lotto-check",
+  "version": "1.0.0",
+  "private": true,
+  "description": "เว็บเช็คหวย - ตรวจหวยรัฐบาล ยี่กี หวยหุ้น",
+  "scripts": {
+    "build": "node build.js",
+    "build:fast": "node build.js --no-fetch",
+    "scrape": "node scrape.js",
+    "scrape:debug": "node scrape.js --debug",
+    "serve": "python3 -m http.server 8765",
+    "serve:dist": "cd dist && python3 -m http.server 8766"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

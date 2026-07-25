@@ -1,0 +1,61 @@
+name: Scrape + Build + Deploy
+
+on:
+  # Auto: every day 01:00 UTC = 08:00 Thailand time
+  # Plus extra runs on draw days 1 & 16 at 15:00 and 16:30 Thailand time
+  schedule:
+    - cron: '0 1 * * *'           # daily 08:00 ICT
+    - cron: '0,30 8-9 1,16 * *'   # draw days 15:00-16:30 ICT
+  # Manual trigger from GitHub Actions UI
+  workflow_dispatch:
+  # On code changes
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'data/**'   # avoid infinite loop when we auto-commit draws.json
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to commit scraped draws.json back
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Scrape latest draw (Sanook / Kapook / GLO)
+        id: scrape
+        run: node scrape.js || echo "scrape failed — will still build with existing data/draws.json"
+        continue-on-error: true
+
+      - name: Commit updated draws.json (if changed)
+        run: |
+          if [[ -n $(git status --porcelain data/draws.json) ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/draws.json
+            git commit -m "chore: update draws.json from scrape [skip ci]"
+            git push
+            echo "✓ pushed new draw data"
+          else
+            echo "ℹ no draw changes to commit"
+          fi
+
+      - name: Build site
+        env:
+          DOMAIN: https://checkhuay.pages.dev
+          MEDIANET_CID: ${{ secrets.MEDIANET_CID }}
+        run: node build.js
+
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx --yes wrangler pages deploy dist --project-name=checkhuay --branch=main --commit-dirty=true
